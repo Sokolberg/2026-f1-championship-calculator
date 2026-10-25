@@ -32,7 +32,7 @@
     header {
       width: 100%;
       text-align: center;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
     }
 
     h1 {
@@ -40,33 +40,19 @@
       font-weight: 600;
       color: #d1d1d1;
       letter-spacing: 1px;
+      margin-bottom: 4px;
     }
 
     .info-bar {
-      margin-top: 6px;
-      font-size: 0.8rem;
-      color: #888;
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-    }
-
-    .info-bar span {
-      background: #111;
-      padding: 4px 12px;
-      border-radius: 4px;
-      border: 1px solid #222;
-    }
-
-    .info-highlight {
-      color: #27f4d2;
-      font-weight: 600;
+      font-size: 0.78rem;
+      color: #8c8c8c;
+      letter-spacing: 0.5px;
     }
 
     .table-container {
       width: 100%;
       max-width: 1200px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     table {
@@ -104,8 +90,6 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      width: 100%;
-      box-sizing: border-box;
     }
 
     .table-driver-dot {
@@ -126,14 +110,10 @@
       color: #ff453a;
       border: 1px solid #ff453a;
       padding: 1px 4px;
-      margin-left: 4px;
+      margin-left: 6px;
       text-transform: uppercase;
       font-weight: 700;
       letter-spacing: 0.5px;
-      line-height: 1;
-      border-radius: 2px;
-      flex-shrink: 0;
-      display: inline-block;
     }
 
     th.total-col, td.total-col {
@@ -254,7 +234,7 @@
     canvas#pointsChart {
       width: 100%;
       height: 100%;
-      max-height: 340px;
+      max-height: 350px;
       background-color: #000000;
       border: 1px solid #8c8c8c;
     }
@@ -273,11 +253,10 @@
       gap: 5px;
       font-size: 0.75rem;
       color: #bcbcbc;
-      transition: opacity 0.3s ease;
     }
 
     .legend-item.eliminated {
-      opacity: 0.45;
+      opacity: 0.4;
       text-decoration: line-through;
     }
 
@@ -304,7 +283,7 @@
       body {
         height: 100vh;
         overflow-y: auto;
-        padding: 10px 6px 6px 6px;
+        padding: 10px 8px 6px 8px;
       }
 
       header { margin-bottom: 12px; }
@@ -315,28 +294,9 @@
       .race-flag { display: inline; font-size: 1rem; }
 
       th:first-child, td:first-child {
-        padding-left: 4px;
-        padding-right: 2px;
-        font-size: 0.68rem;
-        width: 26%;
-      }
-
-      .driver-cell-content {
-        gap: 3px;
-      }
-
-      .table-driver-dot {
-        width: 6px;
-        height: 6px;
-      }
-
-      .eliminated-badge {
-        font-size: 0.5rem;
-        padding: 1px 3px;
-        margin-left: 2px;
-        font-weight: 700;
-        flex-shrink: 0;
-        letter-spacing: 0.2px;
+        padding-left: 6px;
+        font-size: 0.72rem;
+        width: 24%;
       }
 
       select {
@@ -345,7 +305,7 @@
       }
 
       .placeholder-left {
-        left: 6px;
+        left: 8px;
         transform: none;
       }
 
@@ -354,7 +314,7 @@
         height: 2px;
       }
 
-      .placeholder-right { right: 4px; }
+      .placeholder-right { right: 8px; }
 
       button#reset-btn {
         padding: 6px 24px;
@@ -371,9 +331,7 @@
 
   <header>
     <h1>2026 F1 Championship Calculator</h1>
-    <div class="info-bar">
-      <span>Remaining Max Points: <strong id="remaining-pts-display" class="info-highlight">150</strong> PTS</span>
-    </div>
+    <div class="info-bar" id="info-bar">Remaining Points in Championship: 150</div>
   </header>
 
   <div class="table-container">
@@ -412,7 +370,7 @@
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       const drivers = [
-        { name: "Antonelli", base: 340, color: "rgb(39, 244, 210)", isLeader: true },
+        { name: "Antonelli", base: 340, color: "rgb(39, 244, 210)" },
         { name: "Russell", base: 238, color: "rgb(27, 163, 140)" },
         { name: "Hamilton", base: 229, color: "rgb(255, 69, 58)" },
         { name: "Leclerc", base: 221, color: "rgb(255, 214, 10)" },
@@ -420,7 +378,6 @@
       ];
 
       const races = ["COTA", "Mexico", "Brazil", "Las Vegas", "Qatar", "Abu Dhabi"];
-      const MAX_WIN_POINTS = 25;
 
       const positions = [
         { label: "", points: 0, isDefault: true },
@@ -439,7 +396,6 @@
 
       let currentData = drivers.map(d => Array(races.length + 1).fill(d.base));
       let targetData = drivers.map(d => Array(races.length + 1).fill(d.base));
-      let isEliminated = drivers.map(() => false);
       let animationStartTime = null;
       const ANIMATION_DURATION = 700;
 
@@ -447,7 +403,8 @@
 
       drivers.forEach((driver, dIndex) => {
         const tr = document.createElement("tr");
-        tr.id = `driver-row-${dIndex}`;
+        tr.className = "driver-row";
+        tr.id = `row-${dIndex}`;
 
         const tdName = document.createElement("td");
         const nameDiv = document.createElement("div");
@@ -458,18 +415,20 @@
         dot.style.backgroundColor = driver.color;
 
         const nameSpan = document.createElement("span");
-        nameSpan.className = "driver-name-text";
         nameSpan.textContent = driver.name;
-
-        const badge = document.createElement("span");
-        badge.className = "out-badge";
-        badge.id = `badge-${dIndex}`;
-        badge.textContent = "OUT";
-        badge.style.display = "none";
 
         nameDiv.appendChild(dot);
         nameDiv.appendChild(nameSpan);
-        nameDiv.appendChild(badge);
+
+        if (dIndex > 0) {
+          const badge = document.createElement("span");
+          badge.className = "eliminated-badge";
+          badge.id = `badge-${dIndex}`;
+          badge.style.display = "none";
+          badge.textContent = "OUT";
+          nameDiv.appendChild(badge);
+        }
+
         tdName.appendChild(nameDiv);
         tr.appendChild(tdName);
 
@@ -527,10 +486,10 @@
       });
 
       const legendContainer = document.getElementById("legend");
-      drivers.forEach((d, index) => {
+      drivers.forEach((d, idx) => {
         const item = document.createElement("div");
         item.className = "legend-item";
-        item.id = `legend-item-${index}`;
+        item.id = `legend-item-${idx}`;
         item.innerHTML = `<span class="legend-color" style="background-color: ${d.color}"></span> ${d.name}`;
         legendContainer.appendChild(item);
       });
@@ -569,10 +528,25 @@
       }
 
       function updateCalculationsAndChart() {
-        let antonelliIndex = drivers.findIndex(d => d.name === "Antonelli");
-        let totals = [];
+        // Calculate remaining unselected races
+        let unselectedRacesCount = 0;
+        races.forEach((_, rIndex) => {
+          let raceSelected = false;
+          drivers.forEach((_, dIndex) => {
+            const select = document.querySelector(`select[data-driver="${dIndex}"][data-race="${rIndex}"]`);
+            if (select && select.selectedIndex > 0) {
+              raceSelected = true;
+            }
+          });
+          if (!raceSelected) {
+            unselectedRacesCount++;
+          }
+        });
 
-        // 1. Calculate current totals and track target data
+        const remainingPoints = unselectedRacesCount * 25;
+        document.getElementById("info-bar").textContent = `Remaining Points in Championship: ${remainingPoints} (${unselectedRacesCount} races unselected)`;
+
+        const currentTotals = [];
         drivers.forEach((driver, dIndex) => {
           let addedPoints = 0;
           let pointsArray = [driver.base];
@@ -585,67 +559,29 @@
           });
 
           const currentTotal = driver.base + addedPoints;
+          currentTotals.push(currentTotal);
           document.getElementById(`total-${dIndex}`).textContent = currentTotal;
           targetData[dIndex] = pointsArray;
-          totals.push(currentTotal);
         });
 
-        const antonelliCurrentPoints = totals[antonelliIndex];
+        // Check elimination: Antonelli is drivers[0]
+        const antonelliPoints = currentTotals[0];
+        drivers.forEach((_, dIndex) => {
+          if (dIndex === 0) return;
+          const rowElem = document.getElementById(`row-${dIndex}`);
+          const badgeElem = document.getElementById(`badge-${dIndex}`);
+          const legendElem = document.getElementById(`legend-item-${dIndex}`);
 
-        // 2. Compute remaining available points in unassigned races
-        let unassignedRacesCount = 0;
-        let driverMaxPotentialPoints = drivers.map(() => 0);
-
-        races.forEach((_, rIndex) => {
-          let p1Assigned = false;
-          drivers.forEach((_, dIndex) => {
-            const select = document.querySelector(`select[data-driver="${dIndex}"][data-race="${rIndex}"]`);
-            if (select.value == MAX_WIN_POINTS) {
-              p1Assigned = true;
-            }
-          });
-
-          if (!p1Assigned) {
-            unassignedRacesCount++;
-          }
-
-          // Compute max potential points driver can still score in this specific race
-          drivers.forEach((_, dIndex) => {
-            const select = document.querySelector(`select[data-driver="${dIndex}"][data-race="${rIndex}"]`);
-            const val = parseInt(select.value) || 0;
-            
-            if (select.selectedIndex !== 0) {
-              // Position already assigned for driver
-              driverMaxPotentialPoints[dIndex] += val;
-            } else {
-              // Position not selected -> assume driver could win P1 if P1 not assigned to someone else
-              driverMaxPotentialPoints[dIndex] += p1Assigned ? 18 : 25; // P2 if P1 taken, else P1
-            }
-          });
-        });
-
-        const totalRemainingAvailablePoints = unassignedRacesCount * MAX_WIN_POINTS;
-        document.getElementById("remaining-pts-display").textContent = totalRemainingAvailablePoints;
-
-        // 3. Mathematical Elimination check vs Antonelli
-        drivers.forEach((driver, dIndex) => {
-          const row = document.getElementById(`driver-row-${dIndex}`);
-          const badge = document.getElementById(`badge-${dIndex}`);
-          const legendItem = document.getElementById(`legend-item-${dIndex}`);
-          
-          const maxAchievable = totals[dIndex] + driverMaxPotentialPoints[dIndex];
-
-          // Elimination rule: If max potential points cannot reach Antonelli's CURRENT total
-          if (dIndex !== antonelliIndex && maxAchievable < antonelliCurrentPoints) {
-            isEliminated[dIndex] = true;
-            row.classList.add("eliminated-row");
-            badge.style.display = "inline-block";
-            legendItem.classList.add("eliminated");
+          const deficit = antonelliPoints - currentTotals[dIndex];
+          if (deficit > remainingPoints) {
+            // Eliminated
+            rowElem.classList.add("eliminated");
+            badgeElem.style.display = "inline-block";
+            if (legendElem) legendElem.classList.add("eliminated");
           } else {
-            isEliminated[dIndex] = false;
-            row.classList.remove("eliminated-row");
-            badge.style.display = "none";
-            legendItem.classList.remove("eliminated");
+            rowElem.classList.remove("eliminated");
+            badgeElem.style.display = "none";
+            if (legendElem) legendElem.classList.remove("eliminated");
           }
         });
 
@@ -714,8 +650,7 @@
 
       window.addEventListener("resize", resizeCanvas);
 
-      // Smooth Cubic Bézier / Cardinal Spline Curve Drawer
-      function drawSmoothCurve(points, tension = 0.25) {
+      function drawSmoothCurve(points) {
         if (points.length < 2) return;
 
         ctx.beginPath();
@@ -727,6 +662,7 @@
           const p2 = points[i + 1];
           const p3 = points[i + 2 < points.length ? i + 2 : i + 1];
 
+          const tension = 0.25;
           const cp1x = p1.x + (p2.x - p0.x) * tension;
           const cp1y = p1.y + (p2.y - p0.y) * tension;
           const cp2x = p2.x - (p3.x - p1.x) * tension;
@@ -800,31 +736,18 @@
 
         drivers.forEach((driver, dIndex) => {
           const points = currentData[dIndex];
-          const eliminated = isEliminated[dIndex];
-
-          ctx.strokeStyle = eliminated ? "rgba(120, 120, 120, 0.4)" : driver.color;
+          ctx.strokeStyle = driver.color;
           ctx.lineWidth = (isMobile ? 1.8 : 2.2) * dpr;
-
-          if (eliminated) {
-            ctx.setLineDash([4 * dpr, 4 * dpr]);
-          } else {
-            ctx.setLineDash([]);
-          }
 
           const chartPoints = points.map((p, i) => ({
             x: padding.left + i * xStep,
             y: canvas.height - padding.bottom - ((p - minP) / (maxP - minP)) * height
           }));
 
-          // Render smooth flowing curve
-          drawSmoothCurve(chartPoints, 0.25);
+          drawSmoothCurve(chartPoints);
 
-          // Reset dash for dots
-          ctx.setLineDash([]);
-
-          // Render driver position dots
           chartPoints.forEach((pt) => {
-            ctx.fillStyle = eliminated ? "#555555" : driver.color;
+            ctx.fillStyle = driver.color;
             ctx.beginPath();
             ctx.arc(pt.x, pt.y, (isMobile ? 2.8 : 3.5) * dpr, 0, Math.PI * 2);
             ctx.fill();
@@ -832,8 +755,8 @@
         });
       }
 
-      resizeCanvas();
       updateCalculationsAndChart();
+      resizeCanvas();
     });
   </script>
 </body>
