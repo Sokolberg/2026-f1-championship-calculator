@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2026 F1 Championship Calculator</title>
+  <!-- Load Public Sans font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #000000;
+      color: #d1d1d1;
+      font-family: 'Public Sans', Arial, Helvetica, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 16px 12px 16px;
+      overflow: hidden;
+    }
+
+    header {
+      width: 100%;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #d1d1d1;
+      letter-spacing: 1px;
+    }
+
+    .info-bar {
+      margin-top: 6px;
+      font-size: 0.8rem;
+      color: #888;
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .info-bar span {
+      background: #111;
+      padding: 4px 12px;
+      border-radius: 4px;
+      border: 1px solid #222;
+    }
+
+    .info-highlight {
+      color: #27f4d2;
+      font-weight: 600;
+    }
+
+    .table-container {
+      width: 100%;
+      max-width: 1200px;
+      margin-bottom: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid #8c8c8c;
+      table-layout: fixed;
+    }
+
+    th, td {
+      border: 1px solid #8c8c8c;
+      padding: 0;
+      text-align: center;
+      font-size: 0.82rem;
+      overflow: hidden;
+      position: relative;
+    }
+
+    th {
+      background-color: #000000;
+      color: #c7c7c7;
+      font-weight: 600;
+      padding: 6px 2px;
+    }
+
+    th:first-child, td:first-child {
+      text-align: left;
+      padding-left: 10px;
+      font-weight: 600;
+      color: #e0e0e0;
+      width: 22%;
+    }
+
+    .driver-cell-content {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .table-driver-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .driver-row.eliminated {
+      opacity: 0.45;
+    }
+
+    .eliminated-badge {
+      font-size: 0.65rem;
+      background-color: #2a0a0a;
+      color: #ff453a;
+      border: 1px solid #ff453a;
+      padding: 1px 4px;
+      margin-left: 4px;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      line-height: 1;
+      border-radius: 2px;
+      flex-shrink: 0;
+      display: inline-block;
+    }
+
+    th.total-col, td.total-col {
+      background-color: #121212;
+      color: #e6e6e6;
+      font-weight: 600;
+      font-size: 0.88rem;
+      width: 11%;
+      padding: 6px 2px;
+    }
+
+    /* Custom cell wrapper */
+    .select-wrapper {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* DESKTOP: Dash symbol centered */
+    .placeholder-left {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .placeholder-left svg {
+      width: 16px;
+      height: 2px;
+    }
+
+    .placeholder-right {
+      position: absolute;
+      right: 8px;
+      display: flex;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    select {
+      background-color: transparent;
+      color: #606060;
+      border: none;
+      outline: none;
+      border-radius: 0;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      padding: 8px 0;
+      width: 100%;
+      text-align: center;
+      text-align-last: center;
+      font-family: 'Public Sans', Arial, Helvetica, sans-serif;
+      font-size: 0.82rem;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    select option {
+      background-color: #000000;
+      color: #ffffff;
+    }
+
+    select::-ms-expand {
+      display: none;
+    }
+
+    select:focus {
+      outline: none;
+      background-color: #0a0a0a;
+    }
+
+    .controls-container {
+      width: 100%;
+      max-width: 1200px;
+      display: flex;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+
+    button#reset-btn {
+      background-color: #000000;
+      color: #b8b8b8;
+      border: 1px solid #8c8c8c;
+      padding: 6px 22px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: 'Public Sans', Arial, Helvetica, sans-serif;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-radius: 0;
+    }
+
+    button#reset-btn:hover {
+      background-color: #141414;
+      color: #e0e0e0;
+      border-color: #b8b8b8;
+    }
+
+    .chart-container {
+      width: 100%;
+      max-width: 1200px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
+      margin-bottom: 4px;
+    }
+
+    canvas#pointsChart {
+      width: 100%;
+      height: 100%;
+      max-height: 340px;
+      background-color: #000000;
+      border: 1px solid #8c8c8c;
+    }
+
+    .legend-container {
+      display: flex;
+      gap: 16px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.75rem;
+      color: #bcbcbc;
+      transition: opacity 0.3s ease;
+    }
+
+    .legend-item.eliminated {
+      opacity: 0.45;
+      text-decoration: line-through;
+    }
+
+    .legend-color {
+      width: 10px;
+      height: 10px;
+      display: inline-block;
+    }
+
+    footer {
+      width: 100%;
+      text-align: center;
+      font-size: 0.72rem;
+      color: #7a7a7a;
+      padding-top: 4px;
+      border-top: 1px solid #141414;
+    }
+
+    .race-name-full { display: inline; }
+    .race-flag { display: none; }
+
+    /* MOBILE SPECIFIC STYLES */
+    @media (max-width: 768px) {
+      body {
+        height: 100vh;
+        overflow-y: auto;
+        padding: 10px 6px 6px 6px;
+      }
+
+      header { margin-bottom: 12px; }
+      h1 { font-size: 1.15rem; }
+      .info-bar { font-size: 0.7rem; }
+
+      .race-name-full { display: none; }
+      .race-flag { display: inline; font-size: 1rem; }
+
+      th:first-child, td:first-child {
+        padding-left: 4px;
+        padding-right: 2px;
+        font-size: 0.68rem;
+        width: 26%;
+      }
+
+      .driver-cell-content {
+        gap: 3px;
+      }
+
+      .table-driver-dot {
+        width: 6px;
+        height: 6px;
+      }
+
+      .eliminated-badge {
+        font-size: 0.5rem;
+        padding: 1px 3px;
+        margin-left: 2px;
+        font-weight: 700;
+        flex-shrink: 0;
+        letter-spacing: 0.2px;
+      }
+
+      select {
+        font-size: 0.75rem;
+        padding: 8px 0;
+      }
+
+      .placeholder-left {
+        left: 6px;
+        transform: none;
+      }
+
+      .placeholder-left svg {
+        width: 5px;
+        height: 2px;
+      }
+
+      .placeholder-right { right: 4px; }
+
+      button#reset-btn {
+        padding: 6px 24px;
+        font-size: 0.78rem;
+      }
+
+      canvas#pointsChart { max-height: 260px; }
+      .legend-container { gap: 10px; }
+      .legend-item { font-size: 0.68rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>2026 F1 Championship Calculator</h1>
+    <div class="info-bar">
+      <span>Remaining Max Points: <strong id="remaining-pts-display" class="info-highlight">150</strong> PTS</span>
+    </div>
+  </header>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Driver</th>
+          <th><span class="race-name-full">COTA</span><span class="race-flag">🇺🇸</span></th>
+          <th><span class="race-name-full">Mexico</span><span class="race-flag">🇲🇽</span></th>
+          <th><span class="race-name-full">Brazil</span><span class="race-flag">🇧🇷</span></th>
+          <th><span class="race-name-full">Las Vegas</span><span class="race-flag">🇺🇸</span></th>
+          <th><span class="race-name-full">Qatar</span><span class="race-flag">🇶🇦</span></th>
+          <th><span class="race-name-full">Abu Dhabi</span><span class="race-flag">🇦🇪</span></th>
+          <th class="total-col">Total</th>
+        </tr>
+      </thead>
+      <tbody id="driver-rows">
+        <!-- JS renders rows here -->
+      </tbody>
+    </table>
+  </div>
+
+  <div class="controls-container">
+    <button id="reset-btn" onclick="resetAll()">Reset</button>
+  </div>
+
+  <div class="chart-container">
+    <canvas id="pointsChart"></canvas>
+    <div class="legend-container" id="legend"></div>
+  </div>
+
+  <footer>
+    Created by Łukasz Sokołowski
+  </footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const drivers = [
+        { name: "Antonelli", base: 340, color: "rgb(39, 244, 210)", isLeader: true },
+        { name: "Russell", base: 238, color: "rgb(27, 163, 140)" },
+        { name: "Hamilton", base: 229, color: "rgb(255, 69, 58)" },
+        { name: "Leclerc", base: 221, color: "rgb(255, 214, 10)" },
+        { name: "Verstappen", base: 215, color: "rgb(54, 113, 198)" }
+      ];
+
+      const races = ["COTA", "Mexico", "Brazil", "Las Vegas", "Qatar", "Abu Dhabi"];
+      const MAX_WIN_POINTS = 25;
+
+      const positions = [
+        { label: "", points: 0, isDefault: true },
+        { label: "P1", points: 25 },
+        { label: "P2", points: 18 },
+        { label: "P3", points: 15 },
+        { label: "P4", points: 12 },
+        { label: "P5", points: 10 },
+        { label: "P6", points: 8 },
+        { label: "P7", points: 6 },
+        { label: "P8", points: 4 },
+        { label: "P9", points: 2 },
+        { label: "P10", points: 1 },
+        { label: "No Points", points: 0 }
+      ];
+
+      let currentData = drivers.map(d => Array(races.length + 1).fill(d.base));
+      let targetData = drivers.map(d => Array(races.length + 1).fill(d.base));
+      let isEliminated = drivers.map(() => false);
+      let animationStartTime = null;
+      const ANIMATION_DURATION = 700;
+
+      const tbody = document.getElementById("driver-rows");
+
+      drivers.forEach((driver, dIndex) => {
+        const tr = document.createElement("tr");
+        tr.id = `driver-row-${dIndex}`;
+
+        const tdName = document.createElement("td");
+        const nameDiv = document.createElement("div");
+        nameDiv.className = "driver-cell-content";
+
+        const dot = document.createElement("span");
+        dot.className = "table-driver-dot";
+        dot.style.backgroundColor = driver.color;
+
+        const nameSpan = document.createElement("span");
+        nameSpan.className = "driver-name-text";
+        nameSpan.textContent = driver.name;
+
+        const badge = document.createElement("span");
+        badge.className = "out-badge";
+        badge.id = `badge-${dIndex}`;
+        badge.textContent = "OUT";
+        badge.style.display = "none";
+
+        nameDiv.appendChild(dot);
+        nameDiv.appendChild(nameSpan);
+        nameDiv.appendChild(badge);
+        tdName.appendChild(nameDiv);
+        tr.appendChild(tdName);
+
+        races.forEach((race, rIndex) => {
+          const td = document.createElement("td");
+
+          const wrapper = document.createElement("div");
+          wrapper.className = "select-wrapper";
+
+          const spanLeft = document.createElement("span");
+          spanLeft.className = "placeholder-left";
+          spanLeft.innerHTML = `
+            <svg viewBox="0 0 16 2" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+              <line x1="0" y1="1" x2="16" y2="1" stroke="#606060" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          `;
+
+          const spanRight = document.createElement("span");
+          spanRight.className = "placeholder-right";
+          spanRight.innerHTML = `
+            <svg width="8" height="5" viewBox="0 0 8 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M1 1L4 4L7 1" stroke="#606060" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          `;
+
+          const select = document.createElement("select");
+          select.dataset.driver = dIndex;
+          select.dataset.race = rIndex;
+
+          positions.forEach((pos) => {
+            const opt = document.createElement("option");
+            opt.value = pos.points;
+            opt.textContent = pos.label;
+            select.appendChild(opt);
+          });
+
+          select.addEventListener("change", (e) => {
+            handleSelectionChange(e, rIndex, dIndex, spanLeft, spanRight);
+          });
+
+          wrapper.appendChild(spanLeft);
+          wrapper.appendChild(spanRight);
+          wrapper.appendChild(select);
+          td.appendChild(wrapper);
+          tr.appendChild(td);
+        });
+
+        const tdTotal = document.createElement("td");
+        tdTotal.className = "total-col";
+        tdTotal.id = `total-${dIndex}`;
+        tdTotal.textContent = driver.base;
+        tr.appendChild(tdTotal);
+
+        tbody.appendChild(tr);
+      });
+
+      const legendContainer = document.getElementById("legend");
+      drivers.forEach((d, index) => {
+        const item = document.createElement("div");
+        item.className = "legend-item";
+        item.id = `legend-item-${index}`;
+        item.innerHTML = `<span class="legend-color" style="background-color: ${d.color}"></span> ${d.name}`;
+        legendContainer.appendChild(item);
+      });
+
+      function handleSelectionChange(event, raceIndex, changedDriverIndex, spanLeft, spanRight) {
+        const selectElem = event.target;
+        const selectedText = selectElem.options[selectElem.selectedIndex].text;
+
+        if (selectElem.selectedIndex === 0) {
+          selectElem.style.color = "#606060";
+          spanLeft.style.display = "flex";
+          spanRight.style.display = "flex";
+        } else {
+          selectElem.style.color = "#ffffff";
+          spanLeft.style.display = "none";
+          spanRight.style.display = "none";
+        }
+
+        if (selectedText !== "" && selectedText !== "No Points") {
+          const allRaceSelects = document.querySelectorAll(`select[data-race="${raceIndex}"]`);
+          allRaceSelects.forEach(select => {
+            if (parseInt(select.dataset.driver) !== changedDriverIndex) {
+              const currentText = select.options[select.selectedIndex].text;
+              if (currentText === selectedText) {
+                select.selectedIndex = 0;
+                select.style.color = "#606060";
+                const parentWrapper = select.parentElement;
+                parentWrapper.querySelector(".placeholder-left").style.display = "flex";
+                parentWrapper.querySelector(".placeholder-right").style.display = "flex";
+              }
+            }
+          });
+        }
+
+        updateCalculationsAndChart();
+      }
+
+      function updateCalculationsAndChart() {
+        let antonelliIndex = drivers.findIndex(d => d.name === "Antonelli");
+        let totals = [];
+
+        // 1. Calculate current totals and track target data
+        drivers.forEach((driver, dIndex) => {
+          let addedPoints = 0;
+          let pointsArray = [driver.base];
+
+          races.forEach((_, rIndex) => {
+            const select = document.querySelector(`select[data-driver="${dIndex}"][data-race="${rIndex}"]`);
+            const racePts = parseInt(select.value) || 0;
+            addedPoints += racePts;
+            pointsArray.push(driver.base + addedPoints);
+          });
+
+          const currentTotal = driver.base + addedPoints;
+          document.getElementById(`total-${dIndex}`).textContent = currentTotal;
+          targetData[dIndex] = pointsArray;
+          totals.push(currentTotal);
+        });
+
+        const antonelliCurrentPoints = totals[antonelliIndex];
+
+        // 2. Compute remaining available points in unassigned races
+        let unassignedRacesCount = 0;
+        let driverMaxPotentialPoints = drivers.map(() => 0);
+
+        races.forEach((_, rIndex) => {
+          let p1Assigned = false;
+          drivers.forEach((_, dIndex) => {
+            const select = document.querySelector(`select[data-driver="${dIndex}"][data-race="${rIndex}"]`);
+            if (select.value == MAX_WIN_POINTS) {
+              p1Assigned = true;
+            }
+          });
+
+          if (!p1Assigned) {
+            unassignedRacesCount++;
+          }
+
+          // Compute max potential points driver can still score in this specific race
+          drivers.forEach((_, dIndex) => {
+            const select = document.querySelector(`select[data-driver="${dIndex}"][data-race="${rIndex}"]`);
+            const val = parseInt(select.value) || 0;
+            
+            if (select.selectedIndex !== 0) {
+              // Position already assigned for driver
+              driverMaxPotentialPoints[dIndex] += val;
+            } else {
+              // Position not selected -> assume driver could win P1 if P1 not assigned to someone else
+              driverMaxPotentialPoints[dIndex] += p1Assigned ? 18 : 25; // P2 if P1 taken, else P1
+            }
+          });
+        });
+
+        const totalRemainingAvailablePoints = unassignedRacesCount * MAX_WIN_POINTS;
+        document.getElementById("remaining-pts-display").textContent = totalRemainingAvailablePoints;
+
+        // 3. Mathematical Elimination check vs Antonelli
+        drivers.forEach((driver, dIndex) => {
+          const row = document.getElementById(`driver-row-${dIndex}`);
+          const badge = document.getElementById(`badge-${dIndex}`);
+          const legendItem = document.getElementById(`legend-item-${dIndex}`);
+          
+          const maxAchievable = totals[dIndex] + driverMaxPotentialPoints[dIndex];
+
+          // Elimination rule: If max potential points cannot reach Antonelli's CURRENT total
+          if (dIndex !== antonelliIndex && maxAchievable < antonelliCurrentPoints) {
+            isEliminated[dIndex] = true;
+            row.classList.add("eliminated-row");
+            badge.style.display = "inline-block";
+            legendItem.classList.add("eliminated");
+          } else {
+            isEliminated[dIndex] = false;
+            row.classList.remove("eliminated-row");
+            badge.style.display = "none";
+            legendItem.classList.remove("eliminated");
+          }
+        });
+
+        startChartAnimation();
+      }
+
+      window.resetAll = function () {
+        const allSelects = document.querySelectorAll("select");
+        allSelects.forEach(select => {
+          select.selectedIndex = 0;
+          select.style.color = "#606060";
+          const parentWrapper = select.parentElement;
+          if (parentWrapper) {
+            const pLeft = parentWrapper.querySelector(".placeholder-left");
+            const pRight = parentWrapper.querySelector(".placeholder-right");
+            if (pLeft) pLeft.style.display = "flex";
+            if (pRight) pRight.style.display = "flex";
+          }
+        });
+        updateCalculationsAndChart();
+      };
+
+      const canvas = document.getElementById("pointsChart");
+      const ctx = canvas.getContext("2d");
+
+      function easeOutCubic(x) {
+        return 1 - Math.pow(1 - x, 3);
+      }
+
+      function startChartAnimation() {
+        animationStartTime = performance.now();
+        requestAnimationFrame(animateChart);
+      }
+
+      function animateChart(timestamp) {
+        if (!animationStartTime) animationStartTime = timestamp;
+        const elapsed = timestamp - animationStartTime;
+        const progress = Math.min(elapsed / ANIMATION_DURATION, 1);
+        const easedProgress = easeOutCubic(progress);
+
+        drivers.forEach((_, dIndex) => {
+          for (let i = 0; i <= races.length; i++) {
+            const startVal = currentData[dIndex][i];
+            const endVal = targetData[dIndex][i];
+            currentData[dIndex][i] = startVal + (endVal - startVal) * easedProgress;
+          }
+        });
+
+        drawChart();
+
+        if (progress < 1) {
+          requestAnimationFrame(animateChart);
+        } else {
+          drivers.forEach((_, dIndex) => {
+            currentData[dIndex] = [...targetData[dIndex]];
+          });
+        }
+      }
+
+      function resizeCanvas() {
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * (window.devicePixelRatio || 1);
+        canvas.height = rect.height * (window.devicePixelRatio || 1);
+        drawChart();
+      }
+
+      window.addEventListener("resize", resizeCanvas);
+
+      // Smooth Cubic Bézier / Cardinal Spline Curve Drawer
+      function drawSmoothCurve(points, tension = 0.25) {
+        if (points.length < 2) return;
+
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, points[0].y);
+
+        for (let i = 0; i < points.length - 1; i++) {
+          const p0 = points[i === 0 ? i : i - 1];
+          const p1 = points[i];
+          const p2 = points[i + 1];
+          const p3 = points[i + 2 < points.length ? i + 2 : i + 1];
+
+          const cp1x = p1.x + (p2.x - p0.x) * tension;
+          const cp1y = p1.y + (p2.y - p0.y) * tension;
+          const cp2x = p2.x - (p3.x - p1.x) * tension;
+          const cp2y = p2.y - (p3.y - p1.y) * tension;
+
+          ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y);
+        }
+        ctx.stroke();
+      }
+
+      function drawChart() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const dpr = window.devicePixelRatio || 1;
+        const isMobile = window.innerWidth <= 768;
+        const padding = {
+          top: 20 * dpr,
+          right: (isMobile ? 18 : 30) * dpr,
+          bottom: 30 * dpr,
+          left: (isMobile ? 32 : 45) * dpr
+        };
+        const width = canvas.width - padding.left - padding.right;
+        const height = canvas.height - padding.top - padding.bottom;
+
+        const labels = ["Base", ...races];
+
+        let minP = Infinity;
+        let maxP = -Infinity;
+        currentData.forEach(points => {
+          points.forEach(p => {
+            if (p < minP) minP = p;
+            if (p > maxP) maxP = p;
+          });
+        });
+
+        minP = Math.floor(minP / 20) * 20 - 10;
+        maxP = Math.ceil(maxP / 20) * 20 + 10;
+        if (maxP === minP) maxP += 50;
+
+        ctx.strokeStyle = "#333333";
+        ctx.lineWidth = 1 * dpr;
+        ctx.fillStyle = "#999999";
+        ctx.font = `600 ${(isMobile ? 9 : 10) * dpr}px 'Public Sans', Arial`;
+
+        const ySteps = 4;
+        for (let i = 0; i <= ySteps; i++) {
+          const val = Math.round(minP + (maxP - minP) * (i / ySteps));
+          const y = canvas.height - padding.bottom - (i / ySteps) * height;
+
+          ctx.beginPath();
+          ctx.moveTo(padding.left, y);
+          ctx.lineTo(canvas.width - padding.right, y);
+          ctx.stroke();
+
+          ctx.textAlign = "right";
+          ctx.fillText(val, padding.left - 5 * dpr, y + 3 * dpr);
+        }
+
+        const xStep = width / (labels.length - 1);
+        labels.forEach((label, i) => {
+          const x = padding.left + i * xStep;
+
+          ctx.beginPath();
+          ctx.moveTo(x, padding.top);
+          ctx.lineTo(x, canvas.height - padding.bottom);
+          ctx.stroke();
+
+          ctx.textAlign = "center";
+          ctx.fillText(label, x, canvas.height - padding.bottom + 14 * dpr);
+        });
+
+        drivers.forEach((driver, dIndex) => {
+          const points = currentData[dIndex];
+          const eliminated = isEliminated[dIndex];
+
+          ctx.strokeStyle = eliminated ? "rgba(120, 120, 120, 0.4)" : driver.color;
+          ctx.lineWidth = (isMobile ? 1.8 : 2.2) * dpr;
+
+          if (eliminated) {
+            ctx.setLineDash([4 * dpr, 4 * dpr]);
+          } else {
+            ctx.setLineDash([]);
+          }
+
+          const chartPoints = points.map((p, i) => ({
+            x: padding.left + i * xStep,
+            y: canvas.height - padding.bottom - ((p - minP) / (maxP - minP)) * height
+          }));
+
+          // Render smooth flowing curve
+          drawSmoothCurve(chartPoints, 0.25);
+
+          // Reset dash for dots
+          ctx.setLineDash([]);
+
+          // Render driver position dots
+          chartPoints.forEach((pt) => {
+            ctx.fillStyle = eliminated ? "#555555" : driver.color;
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, (isMobile ? 2.8 : 3.5) * dpr, 0, Math.PI * 2);
+            ctx.fill();
+          });
+        });
+      }
+
+      resizeCanvas();
+      updateCalculationsAndChart();
+    });
+  </script>
+</body>
+</html>
